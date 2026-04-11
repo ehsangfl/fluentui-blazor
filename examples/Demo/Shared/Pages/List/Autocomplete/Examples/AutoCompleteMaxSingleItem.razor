@@ -15,14 +15,27 @@
     <b>Selected</b>: @(SelectedItem?.Name)
 </p>
 
+<FluentButton OnClick="SetSelectedItem">Set Zambia</FluentButton>
+
 @code
 {
     Country? SelectedItem = null;
+    IEnumerable<Country>? AllItems = null;
 
-    private async Task OnSearchAsync(OptionsSearchEventArgs<Country> e)
+    protected override async Task OnInitializedAsync()
     {
-        var allCountries = await Data.GetCountriesAsync();
-        e.Items = allCountries.Where(i => i.Name.StartsWith(e.Text, StringComparison.OrdinalIgnoreCase))
+        AllItems = await Data.GetCountriesAsync();
+        await base.OnInitializedAsync();
+    }
+
+    private void OnSearchAsync(OptionsSearchEventArgs<Country> e)
+    {
+        e.Items = AllItems?.Where(i => i.Name.StartsWith(e.Text, StringComparison.OrdinalIgnoreCase))
                               .OrderBy(i => i.Name);
     }
-}
+
+    void SetSelectedItem()
+    {
+        SelectedItem = AllItems?.Last();
+        StateHasChanged();
+    }
